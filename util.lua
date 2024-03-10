@@ -51,3 +51,7 @@ function string.split(str,splitting)
     end
     return encTtable
 end
+
+function string.startswith(str,starts)
+    return string.sub(str,1,#starts) == starts
+end

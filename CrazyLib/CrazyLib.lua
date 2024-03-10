@@ -11,7 +11,7 @@ function CrazyLib.decodeError(self,str,decodedTime)
     local state = "default"
     local strsplitted = string.split(str,",")
     if #strsplitted == 2 then
-        self.events[#self.events+1] = {time = decodedTime, error = self.registered[strsplitted[1]],pos=shallowcopy(self.variables[strsplitted[2]])}
+        self.events[#self.events+1] = {time = decodedTime, error = self.registered[strsplitted[1]],id=strsplitted[1],pos=shallowcopy(self.variables[strsplitted[2]])}
     else
         local equal = string.split(str,"=")
         if #equal == 2 then
@@ -21,7 +21,7 @@ function CrazyLib.decodeError(self,str,decodedTime)
             for i=1,#numbers do
                 self.variables[variable][i] = tonumber(numbers[i])
             end
-            self.events[#self.events+1] = {time = decodedTime, error = self.registered[strsplitted[1]],pos=shallowcopy(self.variables[variable])}
+            self.events[#self.events+1] = {time = decodedTime, error = self.registered[strsplitted[1]],id=strsplitted[1],pos=shallowcopy(self.variables[variable])}
         else
 
             local plus = string.split(str,"+")
@@ -30,7 +30,7 @@ function CrazyLib.decodeError(self,str,decodedTime)
             for i=1,#numbers do
                 self.variables[variable][i] = self.variables[variable][i] + tonumber(numbers[i])
             end
-            self.events[#self.events+1] = {time = decodedTime, error = self.registered[strsplitted[1]],pos=shallowcopy(self.variables[variable])}
+            self.events[#self.events+1] = {time = decodedTime, error = self.registered[strsplitted[1]],id=strsplitted[1],pos=shallowcopy(self.variables[variable])}
         end
 
        
@@ -48,9 +48,15 @@ function CrazyLib.loadString(self,str)
     local listBufferIndex = 1
     local strpos = 1
     local state = "default"
+    line = 0
+    str = str.."\n"
     while strpos <= #str do
         local c = chr(str,strpos)
         if c ~= "\r" then
+            if c == "\n" then
+                line = line + 1
+                print(line)
+            end
             if state == "default" then
                 if isalpha(c) then
                     buffer = buffer..c
@@ -104,7 +110,11 @@ function CrazyLib.loadString(self,str)
                     end
                     encTtable[#encTtable] = tonumber(encTtable[#encTtable])-1
                     local decodedTime = (encTtable[1]*4 + encTtable[2] + encTtable[3]/4)/self.variables.BPM*60
-                    self:decodeError(buffer,decodedTime)
+                    if string.sub(buffer,1,1) == ">" then
+                        self.events[#self.events+1] = {time = decodedTime, command = string.sub(buffer,2)}
+                    else
+                        self:decodeError(buffer,decodedTime)
+                    end
                     --local buffersplitted = string.split(buffer,",")
                     --self.events[#self.events+1] = {time = decodedTime, error = self.registered[buffersplitted[1]],pos=shallowcopy(self.variables[buffersplitted[2]])}
                     self.variables[variable] = decodedTime
@@ -135,8 +145,8 @@ function CrazyLib.loadString(self,str)
                         encTtable[i] = tonumber(encTtable[i])
                     end
                     local decodedTime = (encTtable[1]*4 + encTtable[2] + encTtable[3]/4)/self.variables.BPM*60
-                    if buffer == "clear" then
-                        self.events[#self.events+1] = {time = self.variables[variable] + decodedTime, command = "clear"}
+                    if string.sub(buffer,1,1) == ">" then
+                        self.events[#self.events+1] = {time = self.variables[variable] + decodedTime, command = string.sub(buffer,2)}
                     else
                         self:decodeError(buffer,self.variables[variable] +decodedTime)
 
