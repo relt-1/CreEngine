@@ -9,7 +9,6 @@ function playback.init(self)
 end
 function playback.executeCommand(self,err)
     local cmd = err.command
-    print(cmd)
     if string.startswith(cmd,"clear") then
         local splitted = string.split(cmd,",")
         if #splitted == 2 then
@@ -41,9 +40,12 @@ function playback.update(self)
             self:executeCommand(errors[i])
         else
             local err = errors[i].error
-            local msg = Windows:createWindow(XPWindow,XP:CreateMessageBox(err[2],err[3],Im:Image(err[4]),err[5]))
-            msg.x = errors[i].pos[1]
-            msg.y = errors[i].pos[2]
+            local msg = Windows:createWindow(XPWindow,XP:CreateMessageBox(err[2],err[3],Im:Image(err[4]),err[5]),{
+                x = errors[i].pos[1],
+                y = errors[i].pos[2],
+                originx = errors[i].pos[3] or 0,
+                originy = errors[i].pos[4] or 0
+            })
             msg.id = errors[i].id
         end
     end

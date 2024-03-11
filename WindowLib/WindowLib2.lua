@@ -2,7 +2,7 @@ Windows = {}
 Windows.objects = {}
 
 function Windows.createObject(Windows,parent,base,override)
-    local window = {children = {},parent=parent,x=0,y=0, Windows=Windows}
+    local window = {children = {},parent=parent,x=0,y=0,originx = 0, originy = 0, Windows=Windows}
     if parent == nil then
         Windows.objects[#Windows.objects+1] = window
         window.window = window
@@ -26,11 +26,16 @@ function Windows.createObject(Windows,parent,base,override)
     if window.onCreate then
         window:onCreate(Windows)
     end
+    if window.size then
+        local w,h = window:size()
+        window.x = math.floor(window.x-window.originx/2*w)
+        window.y = math.floor(window.y-window.originy/2*h)
+    end
     return window
 end
 
-function Windows.createWindow(Windows,frame,content)
-    local contentObj = Windows:createObject(nil,content,{})
+function Windows.createWindow(Windows,frame,content,contentData)
+    local contentObj = Windows:createObject(nil,content,contentData or {})
     local frameObj = Windows:createObject(contentObj,frame,
         {
             content = contentObj,

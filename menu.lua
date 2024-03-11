@@ -37,7 +37,6 @@ function menu.init(menu)
     local mainmenu = Windows:createWindow(XPWindow,MainMenu)
     mainmenu.x = 200
     mainmenu.y = 100
-
 end
 
 function menu.update(menu)
